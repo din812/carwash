@@ -16,4 +16,5 @@ public interface CarInQueueRepository extends CrudRepository<CarInQueue, UUID> {
     CarInQueue findFirstByCarWash_IdOrderByPlaceInQueueAsc(Long carWashId);
 
     void deleteAllByCarWash_Id(Long carWashId);
+
 }

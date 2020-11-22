@@ -3,21 +3,17 @@ package din.springframework.aisa.itservice.test.service;
 
 import din.springframework.aisa.itservice.test.model.CarInQueue;
 import din.springframework.aisa.itservice.test.model.CarWash;
-import din.springframework.aisa.itservice.test.model.CarWashingServiceType;
-import din.springframework.aisa.itservice.test.repositories.CarInQueueService;
-import din.springframework.aisa.itservice.test.repositories.CarWashService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.Set;
 
 /**
- * Testing stuff, refactor/remove after.
+ * Class is used for moving and cleaning car wash queue. Task didn't state anything in particular, like moving queue by
+ * command, so i made it automatic with @Schedule. Couldn't figure out or find better solution. :(
  */
-@Slf4j
 @Service
 public class MainService {
 
@@ -29,11 +25,8 @@ public class MainService {
         this.carInQueueService = carInQueueService;
     }
 
-    @Scheduled(fixedDelay = 5000L)
+    @Scheduled(fixedDelay = 1000L)
     private synchronized void scheduledCarWashQueueMover() {
-        System.out.println("//////////////////////////////////////////////////////////////////////////");
-        System.out.println("scheduledCarWashQueueMover started, timestamp: " + LocalDateTime.now());
-
         Set<CarWash> carWashSetOfCompletedWashes = carWashService.findAllByOccupiedUntilBefore(LocalDateTime.now());
         Set<CarWash> emptyCarWashes = carWashService.findAllByOccupiedFalse();
 
@@ -48,26 +41,27 @@ public class MainService {
                 nextCarFromQueue(carWash);
             }
         }
-
-        System.out.println("scheduledCarWashQueueMover ends, timestamp: " + LocalDateTime.now());
-        System.out.println("//////////////////////////////////////////////////////////////////////////");
     }
 
     private synchronized void nextCarFromQueue(CarWash carWash) {
-        System.out.println(carWash.getId());
         CarInQueue firstCarInQueue = carInQueueService.findFirstByCarWash_IdOrderByPlaceInQueueAsc(carWash.getId());
-        System.out.println(firstCarInQueue);
 
         if (firstCarInQueue != null) {
             carWash.setOccupied(true);
             carWash.setOccupiedUntil(LocalDateTime.now().plusMinutes(firstCarInQueue.getWashTime()));
             carWash.setCarPlate(firstCarInQueue.getCarPlate());
-            carWashService.save(carWash);
             carInQueueService.deleteById(firstCarInQueue.getId());
+
+            LinkedList<CarInQueue> carsInQueueByCarWashId = carInQueueService
+                                                            .findAllByCarWashIdOrderByPlaceInQueueAsc(carWash.getId());
+
+            carsInQueueByCarWashId.forEach(carInQueue -> carInQueue.setPlaceInQueue(carInQueue.getPlaceInQueue() - 1L));
+            carInQueueService.saveAll(carsInQueueByCarWashId);
         } else {
             carWash.setOccupied(false);
             carWash.setOccupiedUntil(null);
             carWash.setCarPlate(null);
         }
+        carWashService.save(carWash);
     }
 }

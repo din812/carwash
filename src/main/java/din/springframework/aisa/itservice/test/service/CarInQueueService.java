@@ -1,19 +1,40 @@
-package din.springframework.aisa.itservice.test.repositories;
+package din.springframework.aisa.itservice.test.service;
 
 import din.springframework.aisa.itservice.test.model.CarInQueue;
+import din.springframework.aisa.itservice.test.model.CarWash;
+import din.springframework.aisa.itservice.test.repositories.CarInQueueRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
-public class CarInQueueService implements CarInQueueRepository{
+public class CarInQueueService implements CarInQueueRepository {
 
     private final CarInQueueRepository carInQueueRepository;
+    private final CarWashService carWashService;
 
-    public CarInQueueService(CarInQueueRepository carInQueueRepository) {
+    public CarInQueueService(CarInQueueRepository carInQueueRepository, CarWashService carWashService) {
         this.carInQueueRepository = carInQueueRepository;
+        this.carWashService = carWashService;
+    }
+
+    public LocalDateTime timeUntilQueueEnd(CarInQueue carInQueue) {
+        LinkedList<CarInQueue> carsInQueue = carInQueueRepository
+                .findAllByCarWashIdOrderByPlaceInQueueAsc(carInQueue.getCarWash().getId());
+
+        carsInQueue.subList(carsInQueue.indexOf(carInQueue), carsInQueue.size()).clear();
+        CarWash carWash = carWashService.findById(carInQueue.getCarWash().getId()).get();
+
+        return carWash
+                .getOccupiedUntil()
+                .plusMinutes(
+                        carsInQueue.stream()
+                                .mapToLong(CarInQueue::getWashTime)
+                                .sum()
+                );
     }
 
     @Override
@@ -26,6 +47,7 @@ public class CarInQueueService implements CarInQueueRepository{
         } else {
             entity.setPlaceInQueue(carsInQueue.getLast().getPlaceInQueue() + 1L);
         }
+
 
         return carInQueueRepository.save(entity);
     }

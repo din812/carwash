@@ -1,6 +1,7 @@
-package din.springframework.aisa.itservice.test.repositories;
+package din.springframework.aisa.itservice.test.service;
 
 import din.springframework.aisa.itservice.test.model.CarWash;
+import din.springframework.aisa.itservice.test.repositories.CarWashRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

@@ -1,21 +1,20 @@
 package din.springframework.aisa.itservice.test.bootstrap;
 
 import din.springframework.aisa.itservice.test.model.CarInQueue;
-import din.springframework.aisa.itservice.test.model.CarWash;
 import din.springframework.aisa.itservice.test.model.CarWashingServiceType;
-import din.springframework.aisa.itservice.test.repositories.CarInQueueService;
-import din.springframework.aisa.itservice.test.repositories.CarWashService;
-import din.springframework.aisa.itservice.test.repositories.CarWashingServiceTypeService;
+import din.springframework.aisa.itservice.test.service.CarInQueueService;
+import din.springframework.aisa.itservice.test.service.CarWashService;
+import din.springframework.aisa.itservice.test.service.CarWashingServiceTypeService;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.concurrent.*;
 
+
+/**
+ * Keeping it as is, used for testing swagger.
+ */
 @Transactional
 @Component
 public class BootStrap implements CommandLineRunner {
@@ -45,7 +44,8 @@ public class BootStrap implements CommandLineRunner {
 
         CarInQueue carQueue1 = new CarInQueue();
         carQueue1.setCarPlate("a335ra");
-        carQueue1.getOrderedServices().addAll((Collection<? extends CarWashingServiceType>) carWashingServiceTypeService.findAll());
+        carQueue1.getOrderedServices()
+                .addAll((Collection<? extends CarWashingServiceType>) carWashingServiceTypeService.findAll());
         carQueue1.setWashTime(carQueue1.getOrderedServices().stream()
                 .mapToLong(CarWashingServiceType::getRequiredTime).sum());
         carQueue1.setCarWash(carWashService.findById(1L).get());

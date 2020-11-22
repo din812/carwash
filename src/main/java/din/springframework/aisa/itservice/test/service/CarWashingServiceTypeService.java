@@ -1,6 +1,7 @@
-package din.springframework.aisa.itservice.test.repositories;
+package din.springframework.aisa.itservice.test.service;
 
 import din.springframework.aisa.itservice.test.model.CarWashingServiceType;
+import din.springframework.aisa.itservice.test.repositories.CarWashingServiceTypeRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;

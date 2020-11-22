@@ -1,13 +1,11 @@
 package din.springframework.aisa.itservice.test.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
-import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
-import java.io.Serializable;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
@@ -28,13 +26,16 @@ public class CarInQueue{
 
     private Long placeInQueue;
 
+    @NotBlank
+    @Size(min = 5, max = 10)
     private String carPlate;
 
     private Long washTime;
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    //@NotBlank
+    @ManyToMany
     @JoinTable(name = "ordered_services",
         joinColumns = @JoinColumn(name = "car_in_queue_id"),
         inverseJoinColumns = @JoinColumn(name = "car_washing_service_type_id"))
@@ -42,7 +43,6 @@ public class CarInQueue{
 
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @JsonIgnore
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     private CarWash carWash;
 }
